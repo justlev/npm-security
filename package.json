@@ -1,0 +1,23 @@
+{
+  "name": "npm-security-be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "test": "mocha"
+  },
+  "author": "Lev Perlman",
+  "license": "ISC",
+  "dependencies": {
+    "compare-versions": "^3.4.0",
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "node-fetch": "^2.3.0",
+    "redis": "^2.8.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "nodemon": "^1.18.9"
+  }
+}
