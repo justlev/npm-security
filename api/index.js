@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const { getVulnerabilities } = require('./vulnerabilities');
+const { getPackageDependencies } = require('./packageInfo');
 
-router.get('/vulnerabilities/:packageName/:packageVersion', getVulnerabilities);
+router.get('/dependencies/:packageName/:packageVersion', getPackageDependencies);
 
 module.exports = router;

@@ -7,14 +7,16 @@ const PackageInfoProvider = require('../packages-service');
 //By using Redis - we are offloading the cache-eviction logic to Redis itself which implements it quite well
 //We can change the eviction policies in Redis config.
 const cache = new RedisCache();
+const packageInfoProvider = new PackageInfoProvider(cache);
 
 const instances = {
     RedisCache: cache,
+    PackageInfoProvider:  packageInfoProvider,
     VulnerabilitiesService: new VulnerabilitiesService(
         new VulnerabilitiesProvider(),
         conditionsHandlerFunction,
         cache,
-        new PackageInfoProvider(cache)
+        packageInfoProvider
         )
 };
 

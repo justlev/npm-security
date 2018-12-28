@@ -14,13 +14,14 @@ app.listen(8080, function(){
     console.log('listening on 8080');
 });
 
-let package = {name: 'fetch', version: 'latest'}
+module.exports = app;
+// let package = {name: 'react-select', version: 'latest'}
 
-const promise = container["VulnerabilitiesService"].findVulnerabilities(package.name, package.version, (vulnerabilities) => {
-    console.log(vulnerabilities);
-}, (err) => {
-    console.log(err);
-});
-promise.then(res => {
-    console.log(res);
-})
+// const promise = container["VulnerabilitiesService"].findVulnerabilities(package.name, package.version, (vulnerabilities) => {
+//     console.log(vulnerabilities);
+// }, (err) => {
+//     console.log(err);
+// });
+// promise.then(res => {
+//     console.log(res);
+// })

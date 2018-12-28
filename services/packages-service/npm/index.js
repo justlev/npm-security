@@ -1,5 +1,5 @@
 const NPM_PACKAGES_URL = process.env["NPM_PACKAGES_URL"];
-const fetch = require('node-fetch');
+require('isomorphic-fetch');
 
 async function getPackageInfo(packageName, packageVersion){
     const promise = new Promise((resolve, reject) => {
@@ -11,6 +11,8 @@ async function getPackageInfo(packageName, packageVersion){
         })
         .catch(
             (err) => {
+                console.log(packageName)
+                console.log(packageVersion)
                 reject(err);
             }
         );
