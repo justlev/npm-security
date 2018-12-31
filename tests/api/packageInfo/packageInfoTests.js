@@ -19,6 +19,7 @@ describe('/GET/dependencies/{packageName}/{packageVersion}', () => {
     afterEach((done) => {
         fetchMock.restore();
         RedisCache.prototype.get.restore();
+        server.stop();
         done();
     });
 
@@ -45,7 +46,7 @@ describe('/GET/dependencies/{packageName}/{packageVersion}', () => {
     });
 
     describe('package with flat dependencies', () => {
-        it('should return empty object', (done) => {
+        it('should return proper dependencies hashset', (done) => {
             const rootPackageName = 'lodash';
             const rootPackageVersion = '1.0.0';
             const requestUrl = `/dependencies/${rootPackageName}/${rootPackageVersion}`

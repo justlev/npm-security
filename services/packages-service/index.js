@@ -12,15 +12,14 @@ class PackageInfoProvider{
     }
 
     async _getPackageDependenciesHashRecursively(name, version){
-        const info = await this._packageInfoProvider(getNormalisedPackageName(name), getNpmVersionString(version));
-        //TODO: Problem with repos like this one: https://www.npmjs.com/package/@emotion/hash
+        const packageId = `${name}@${version}`;
         if (this._cache != null){
-            //console.log(`accessing redis for ${name}:${version} with id: ${info._id}`)
-            const result = await this._cache.get(info._id);
+            const result = await this._cache.get(packageId);
             if (result != null){
                 return result;
             }
         }
+        const info = await this._packageInfoProvider(getNormalisedPackageName(name), getNpmVersionString(version));
         const dependenciesObjects = {};
         if (typeof(info.dependencies) !== 'undefined'){
             const dependenciesKeys = Object.keys(info.dependencies);
@@ -33,7 +32,7 @@ class PackageInfoProvider{
             }
         }
         if (this._cache != null){
-            this._cache.set(info._id, dependenciesObjects);
+            this._cache.set(packageId, dependenciesObjects);
         }
         return dependenciesObjects
 
