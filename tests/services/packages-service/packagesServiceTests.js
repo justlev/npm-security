@@ -1,9 +1,8 @@
-process.env.NODE_ENV = 'test';
+require('../../config');
 
 const chai = require('chai');
 chai.should();
 const sinon = require('sinon');
-const mockRequire = require('mock-require');
 const PackageInfoProvider = require('../../../services/packages-service');
 const RedisCache = require('../../../services/caches/redis-cache');
 

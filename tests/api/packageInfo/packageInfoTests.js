@@ -1,4 +1,4 @@
-process.env.NODE_ENV = 'test';
+require('../../config');
 
 const chai = require('chai');
 const RedisCache = require('../../../services/caches/redis-cache');
@@ -32,7 +32,7 @@ describe('/GET/dependencies/{packageName}/{packageVersion}', () => {
                 _id: `${packageName}@${packageVersion}`,
                 dependencies: []
             };
-            fetchMock.get(getNpmRequestUrl(packageName, packageVersion), rootPackageResponse);
+            fetchMock.get(getNpmRequestUrl(packageName, packageVersion), rootPackageResponse, {overwriteRoutes: true});
             chai.request(server)
                 .get(requestUrl)
                 .end((err, res) => {
