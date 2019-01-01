@@ -16,7 +16,6 @@ describe('#get', () => {
     describe("redis resolves promise with JSON value", () => {
         it('resolves root promise with parsed redis value', (done) => {
             const redisClientMock = {get: function(key, handler){
-                console.log('test');
                 handler(null,JSON.stringify(testValue));
             }};
             redisStub.createClient.returns(redisClientMock);
@@ -37,7 +36,6 @@ describe('#get', () => {
         it('rejects root promise with error', (done) => {
             const redisError = {error: 1};
             const redisClientMock = {get: function(key, handler){
-                console.log('test');
                 handler(redisError,null);
             }};
             redisStub.createClient.returns(redisClientMock);
