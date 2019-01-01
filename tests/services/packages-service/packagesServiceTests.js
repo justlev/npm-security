@@ -259,6 +259,88 @@ describe('PackageInfoProvider', () => {
                 });
             });
         });
+
+        describe("with cache", () => {
+            let cache = sinon.createStubInstance(RedisCache);
+            beforeEach((done) => {
+                cache = sinon.createStubInstance(RedisCache);
+                done();
+            });
+
+            describe('package not cached', () => {
+                it('should request info of packages from NPM', (done) => {
+                    const rootDependenciesObject = {};
+                    rootDependenciesObject[dependency1.name] = dependency1.version;
+
+                    const rootPackageResponse = {
+                        _id: rootPackage._id,
+                        dependencies: rootDependenciesObject
+                    };
+                    cache.get.returns(getNpmPackageResolvedPromise(null));
+        
+                    const npmStub = sinon.stub();
+                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
+                    npmStub.withArgs(dependency1.name, dependency1.version).returns(getNpmPackageResolvedPromise(dependency1));
+                    const subject = new PackagesService(npmStub, cache);
+                    
+                    const expected = {...rootPackage, dependencies: [{...dependency1, dependencies: []}]};
+                    const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
+                    promise.then((actual)=> {
+                        npmStub.calledTwice.should.be.true;
+                        actual.should.be.deep.eq(expected)
+                        done(); 
+                    });
+                });
+            });
+
+            describe('package completely cached', () => {
+                it('should not request info of packages from NPM', (done) => {
+                    const rootItemKey = `tree:${rootPackage._id}`;
+                    const expected = {...rootPackage, dependencies: [{...dependency1, dependencies: []}]};
+                    cache.get.withArgs(rootItemKey).returns(getNpmPackageResolvedPromise(expected));
+        
+                    const npmStub = sinon.stub();
+                    const subject = new PackagesService(npmStub, cache);
+                    
+                    
+                    const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
+                    promise.then((actual)=> {
+                        npmStub.called.should.be.false;
+                        actual.should.be.deep.eq(expected)
+                        done(); 
+                    });
+                });
+            });
+
+            describe('package not cached but dependency cached', () => {
+                it('should request info only of root from NPM', (done) => {
+                    const rootDependenciesObject = {};
+                    rootDependenciesObject[dependency1.name] = dependency1.version;
+
+                    const rootPackageResponse = {
+                        ...rootPackage,
+                        dependencies: rootDependenciesObject
+                    };
+                    const cacheKey = `tree:${dependency1._id}`;
+                    const dependency1Object = {...dependency1, dependencies: []};
+                    const expected = {...rootPackage, dependencies: [dependency1Object]};
+                    cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise(dependency1Object));
+        
+                    const npmStub = sinon.stub();
+                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
+                    const subject = new PackagesService(npmStub, cache);
+        
+                    const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
+                    promise.then((actual)=> {
+                        npmStub.calledOnceWith(rootPackage.name, rootPackage.version).should.be.true;
+                        npmStub.calledWith(dependency1.name, dependency1.version).should.be.false;
+                        actual.should.not.be.null;
+                        actual.should.be.deep.eq(expected)
+                        done(); 
+                    });
+                });
+            });
+        });
     })
 });
 

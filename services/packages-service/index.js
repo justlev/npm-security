@@ -61,7 +61,8 @@ class PackagesService{
             try{
                 const result = await this._cache.get(`${this._treeCachePrefix}${packageId}`);
                 if (result != null){
-                    return result;
+                    Object.assign(obj, result);
+                    return;
                 }
             }
             catch(ex){
