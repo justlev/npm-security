@@ -1,7 +1,7 @@
 class VulnerabilitiesService{
-    constructor(vulnerabilitiesProvider, conditionsHandlerFunction, vulnerabilitiesCache, packageInfoProvider){
+    constructor(vulnerabilitiesProvider, conditionsHandlerFunction, vulnerabilitiesCache, packagesService){
         this._vulnerabilitiesProvider = vulnerabilitiesProvider;
-        this._packageInfoProvider = packageInfoProvider;
+        this._packagesService = packagesService;
         this._conditionsHandler = conditionsHandlerFunction;
         this._cache = vulnerabilitiesCache;
     }
@@ -13,11 +13,11 @@ class VulnerabilitiesService{
         //         return;
         //     }
         // });
-        return await this._packageInfoProvider.getPackageDependenciesHash(packageName, packageVersion);
+        return await this._packagesService.getPackageDependenciesHash(packageName, packageVersion);
 //
 //
 
-        const packageTree = await _packageInfoProvider.getNormalisedPackageTree(packageName, packageVersion);
+        const packageTree = await _packagesService.getNormalisedPackageTree(packageName, packageVersion);
         const computationPromise = new Promise((resolve, reject) => {
             const foundVulnerabilities = this.findVulnerabilitiesRecursively(packageInfo, null);
             resolve(foundVulnerabilities);

@@ -1,13 +1,13 @@
 const { getNpmVersionString, getNormalisedPackageName } = require('../../utilities/packageNames');
 
-class PackageInfoProvider{
+class PackagesService{
     constructor(packageInfoProvider, cache=null){
         this._cache = cache;
         this._packageInfoProvider = packageInfoProvider;
     }
 
     async getPackageDependenciesHash(packageName, packageVersion){
-        const result = await this._getPackageDependenciesHashRecursively(packageName, packageVersion);
+        const result = await this._getPackageDependenciesHashRecursively(getNormalisedPackageName(packageName), getNpmVersionString(packageVersion));
         return result;
     }
 
@@ -24,15 +24,17 @@ class PackageInfoProvider{
                 // Maybe log that error occured when redis raised error
             }
         }
-        const info = await this._packageInfoProvider(getNormalisedPackageName(name), getNpmVersionString(version));
+        const info = await this._packageInfoProvider(name, version);
         const dependenciesObjects = {};
         if (typeof(info.dependencies) !== 'undefined'){
             const dependenciesKeys = Object.keys(info.dependencies);
             for (let i = 0;i<dependenciesKeys.length;i++){
                 const key = dependenciesKeys[i];
+                const normalisedKey = getNormalisedPackageName(key);
                 const version = info.dependencies[key];
-                dependenciesObjects[key] = version;
-                const childDependencies = await this._getPackageDependenciesHashRecursively(key, version);
+                const normalisedVersion = getNpmVersionString(version);
+                dependenciesObjects[normalisedKey] = normalisedVersion;
+                const childDependencies = await this._getPackageDependenciesHashRecursively(normalisedKey, normalisedVersion);
                 Object.assign(dependenciesObjects, childDependencies)
             }
         }
@@ -45,7 +47,7 @@ class PackageInfoProvider{
 
     async getNormalisedPackageTree(packageName, packageVersion){
         const obj = {name: packageName, version: packageVersion, dependencies: []};
-        await this._getPackageDetailsRecursively(packageName, packageVersion, obj);
+        await this._getPackageDetailsRecursively(getNormalisedPackageName(packageName), getNpmVersionString(packageVersion), obj);
         return obj;
     }
 
@@ -55,11 +57,10 @@ class PackageInfoProvider{
             const dependenciesKeys = Object.keys(info.dependencies);
             for (let i = 0;i<dependenciesKeys.length;i++){
                 const key = dependenciesKeys[i];
-                let version = info.dependencies[key];
-                if (version.indexOf('^')!==-1){
-                    version='latest';
-                }
-                const depObj = {name: key, version: version, dependencies: []};
+                const normalisedKey = getNormalisedPackageName(key);
+                const version = info.dependencies[key];
+                const normalisedVersion = getNpmVersionString(version);
+                const depObj = {name: normalisedKey, version: normalisedVersion, dependencies: []};
                 obj.dependencies.push(depObj);
                 this._getPackageDetailsRecursively(key, version, depObj);
             }
@@ -67,4 +68,4 @@ class PackageInfoProvider{
     }
 }
 
-module.exports = PackageInfoProvider;
+module.exports = PackagesService;
