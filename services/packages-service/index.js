@@ -14,9 +14,14 @@ class PackageInfoProvider{
     async _getPackageDependenciesHashRecursively(name, version){
         const packageId = `${name}@${version}`;
         if (this._cache != null){
-            const result = await this._cache.get(packageId);
-            if (result != null){
-                return result;
+            try{
+                const result = await this._cache.get(packageId);
+                if (result != null){
+                    return result;
+                }
+            }
+            catch(ex){
+                // Maybe log that error occured when redis raised error
             }
         }
         const info = await this._packageInfoProvider(getNormalisedPackageName(name), getNpmVersionString(version));
