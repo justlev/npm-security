@@ -26,7 +26,8 @@ class PackagesService{
                 }
             }
             catch(ex){
-                // Maybe log that error occured when redis raised error
+                // Maybe log that error occured when redis raised error.
+                // Continue flow so client doesn't experience cache errors.
             }
         }
         const info = await this._packageInfoProvider(name, version);
@@ -69,7 +70,8 @@ class PackagesService{
                 }
             }
             catch(ex){
-                // Maybe log that error occured when redis raised error
+                // Maybe log that error occured when redis raised error.
+                // Continue flow so client doesn't experience cache errors.
             }
         }
 

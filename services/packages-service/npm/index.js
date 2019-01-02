@@ -1,5 +1,6 @@
 const NPM_PACKAGES_URL = process.env["NPM_PACKAGES_URL"] || "https://registry.npmjs.org/";
-const semver = require('semver')
+const semver = require('semver');
+const findMatchingVersion = require('../versions');
 require('isomorphic-fetch');
 
 async function getPackageInfo(packageName, packageVersion){
@@ -30,13 +31,11 @@ async function getExactMatchingVersion(packageName, packageVersion){
         const packageContainer = await queryPackageDetails(packageName);
         // The following versions lookup can be optimised:
         const versions = Object.keys(packageContainer.versions);
-        const sortedVersions = versions.sort();
-        const matchingVersions = sortedVersions.filter(item => semver.satisfies(item, packageVersion));
-        if (matchingVersions.length == 0 ){
+        const matchingVersion = findMatchingVersion(versions, packageVersion);
+        if (matchingVersion == null){
             reject("No matching versions found");
             return;
         }
-        const matchingVersion = matchingVersions[matchingVersions.length-1];
         resolve(matchingVersion);
     });
 
