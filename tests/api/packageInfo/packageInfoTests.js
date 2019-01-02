@@ -1,18 +1,27 @@
 require('../../config');
 
 const chai = require('chai');
-const RedisCache = require('../../../services/caches/redis-cache');
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 chai.should();
-const sinon = require('sinon');
 const fetchMock = require('fetch-mock');
+const sinon = require('sinon');
+const proxyquire =  require('proxyquire');
+const redis = require('redis');
+const redisStub = sinon.stub(redis);
+
+const redisClientMock = {get: function(key, handler){
+    handler(null,null);
+}, set: function(key, value) {} };
+redisStub.createClient.returns(redisClientMock);
+
+proxyquire('../../../services/caches/redis-cache', {redis: redisStub});
+
 let server = {};
 
 describe('/GET/dependencies/{packageName}/{packageVersion}', () => {
 
     beforeEach((done) => {
-        sinon.stub(RedisCache.prototype, 'get').returns(new Promise((resolve, rej) => resolve(null)));
         done();
     });
 
@@ -23,12 +32,12 @@ describe('/GET/dependencies/{packageName}/{packageVersion}', () => {
 
     after((done) => {
         server.stop();
+        sinon.restore();
         done();
     });
 
     afterEach((done) => {
         fetchMock.restore();
-        RedisCache.prototype.get.restore();
         done();
     })
     

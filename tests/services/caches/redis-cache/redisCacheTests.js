@@ -4,14 +4,21 @@ chai.should();
 const sinon = require('sinon');
 const proxyquire =  require('proxyquire');
 const redis = require('redis');
-const redisStub = sinon.stub(redis);
-proxyquire('../../../../services/caches/redis-cache', {redis: redisStub});
-const RedisCache = require('../../../../services/caches/redis-cache');
-
 const testValue = {a:1};
+const RedisCache = require('../../../../services/caches/redis-cache');
+let redisStub = {};
 
 describe('#get', () => {
     const itemId = "id";
+
+    before(() => {
+        redisStub = sinon.stub(redis);
+        proxyquire('../../../../services/caches/redis-cache', {redis: redisStub});
+    });
+
+    after(() => {
+        sinon.restore();
+    })
 
     describe("redis resolves promise with JSON value", () => {
         it('resolves root promise with parsed redis value', (done) => {
@@ -42,13 +49,13 @@ describe('#get', () => {
             const subject = new RedisCache();
 
             const promise = subject.get(itemId);
-            promise.catch((err) => {
+            
+            promise.then((actual) => {
+                done(`Redis resolved promise with ${actual} while it should have been null`);
+            }).catch((err) => {
                 err.should.be.deep.eq(redisError);
                 done();
             });
-            promise.then((actual) => {
-                done(`Redis resolved promise with ${actual} while it should have been null`);
-            })
         });
     });
 });
