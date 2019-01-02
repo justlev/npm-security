@@ -29,7 +29,6 @@ async function getExactMatchingVersion(packageName, packageVersion){
             return;
         }
         const packageContainer = await queryPackageDetails(packageName);
-        // The following versions lookup can be optimised:
         const versions = Object.keys(packageContainer.versions);
         const matchingVersion = findMatchingVersion(versions, packageVersion);
         if (matchingVersion == null){
