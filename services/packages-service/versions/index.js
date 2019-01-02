@@ -1,4 +1,4 @@
-const semver = require('semver')
+const semver = require('semver');
 
 //This is extracted to an external function so that here we can cache versions as well, and reset the cache when needed.
 function findMatchingVersion(allVersions, matchingPattern){

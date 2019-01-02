@@ -1,5 +1,4 @@
 const RedisCache = require('../caches/redis-cache');
-const conditionsHandlerFunction = require('../conditions-handler');
 const PackagesService = require('../packages-service');
 const npmProvider = require('../packages-service/npm');
 
