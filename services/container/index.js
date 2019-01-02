@@ -1,6 +1,4 @@
 const RedisCache = require('../caches/redis-cache');
-const VulnerabilitiesService = require('../vulnerabilities-service');
-const VulnerabilitiesProvider = require('../vulnerabilities-provider');
 const conditionsHandlerFunction = require('../conditions-handler');
 const PackagesService = require('../packages-service');
 const npmInfoProvider = require('../packages-service/npm');
@@ -12,13 +10,7 @@ const packagesService = new PackagesService(npmInfoProvider, cache);
 
 const instances = {
     RedisCache: cache,
-    PackagesService:  packagesService,
-    VulnerabilitiesService: new VulnerabilitiesService(
-        new VulnerabilitiesProvider(),
-        conditionsHandlerFunction,
-        cache,
-        packagesService
-        )
+    PackagesService:  packagesService
 };
 
 

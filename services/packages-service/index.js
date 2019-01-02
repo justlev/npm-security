@@ -36,7 +36,7 @@ class PackagesService{
                 const normalisedKey = getNormalisedPackageName(key);
                 const version = info.dependencies[key];
                 const normalisedVersion = getNpmVersionString(version);
-                dependenciesObjects[normalisedKey] = normalisedVersion;
+                dependenciesObjects[normalisedKey] = version;
                 const childDependencies = await this._getPackageDependenciesHashRecursively(normalisedKey, normalisedVersion);
                 Object.assign(dependenciesObjects, childDependencies)
             }
@@ -79,9 +79,9 @@ class PackagesService{
                 const version = info.dependencies[key];
                 const normalisedVersion = getNpmVersionString(version);
                 const dependencyId = `${normalisedKey}@${normalisedVersion}`;
-                const depObj = {_id: dependencyId, name: normalisedKey, version: normalisedVersion, dependencies: []};
+                const depObj = {_id: dependencyId, name: normalisedKey, version: version, dependencies: []};
                 obj.dependencies.push(depObj);
-                this._getPackageDetailsRecursively(key, version, depObj);
+                await this._getPackageDetailsRecursively(key, normalisedVersion, depObj);
             }
         }
 

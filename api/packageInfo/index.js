@@ -11,6 +11,18 @@ async function getPackageDependencies(req, res){
     }
 }
 
+async function getPackageDependenciesAsTree(req, res){
+    const {packageName, packageVersion} = req.params;
+    try{
+        const packageDependencies = await container["PackagesService"].getNormalisedPackageTree(packageName, packageVersion);
+        res.send(packageDependencies);
+    }
+    catch(er){
+        res.send(er);
+    }
+}
+
 module.exports = {
-    getPackageDependencies
+    getPackageDependencies,
+    getPackageDependenciesAsTree
 }
