@@ -2,7 +2,7 @@ const redis = require('redis');
 
 class RedisCache{
     constructor(){
-        this._client = new redis.createClient(process.env["REDIS_URL"] || "redis://DqUmrVq6A7ZXcuMGwFBRfAhwsKPip1Y7@redis-16151.c99.us-east-1-4.ec2.cloud.redislabs.com:16151/0", {password: 'DqUmrVq6A7ZXcuMGwFBRfAhwsKPip1Y7', db: 'heart-db'});
+        this._client = new redis.createClient(process.env["REDIS_URL"] || "redis://localhost:6379/0");
     }
 
     set(key, value){
