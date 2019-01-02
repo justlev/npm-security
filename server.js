@@ -1,5 +1,4 @@
 require('dotenv').config();
-const container = require('./services/container');
 const bodyParser = require("body-parser");
 const express = require('express');
 const app = express();
@@ -14,17 +13,9 @@ const server = app.listen(8080, function(){
     console.log('listening on 8080');
 });
 
-module.exports = app;
-module.exports.stop = () => {
+function stop(){
     server.close();
 }
-// let package = {name: 'react-select', version: 'latest'}
 
-// const promise = container["VulnerabilitiesService"].findVulnerabilities(package.name, package.version, (vulnerabilities) => {
-//     console.log(vulnerabilities);
-// }, (err) => {
-//     console.log(err);
-// });
-// promise.then(res => {
-//     console.log(res);
-// })
+module.exports = server;
+module.exports.stop = stop;

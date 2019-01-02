@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "mocha --recursive tests/"
+    "test": "nyc mocha --recursive tests/"
   },
   "author": "Lev Perlman",
   "license": "ISC",
@@ -25,6 +25,7 @@
     "mocha": "^5.2.0",
     "mock-require": "^3.0.2",
     "nodemon": "^1.18.9",
+    "nyc": "^13.1.0",
     "proxyquire": "^2.1.0",
     "sinon": "^7.2.2"
   }

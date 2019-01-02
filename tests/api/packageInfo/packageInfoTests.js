@@ -7,22 +7,31 @@ chai.use(chaiHttp);
 chai.should();
 const sinon = require('sinon');
 const fetchMock = require('fetch-mock');
-const server = require('../../../server');
-
+let server = {};
 
 describe('/GET/dependencies/{packageName}/{packageVersion}', () => {
+
     beforeEach((done) => {
         sinon.stub(RedisCache.prototype, 'get').returns(new Promise((resolve, rej) => resolve(null)));
+        done();
+    });
+
+    before((done) => {
+        server = require('../../../server');
+        done();
+    });
+
+    after((done) => {
+        server.stop();
         done();
     });
 
     afterEach((done) => {
         fetchMock.restore();
         RedisCache.prototype.get.restore();
-        server.stop();
         done();
-    });
-
+    })
+    
     describe('package without dependencies', () => {
         it('should return empty object', (done) => {
             const packageName = 'lodash';
@@ -35,13 +44,16 @@ describe('/GET/dependencies/{packageName}/{packageVersion}', () => {
             fetchMock.get(getNpmRequestUrl(packageName, packageVersion), rootPackageResponse, {overwriteRoutes: true});
             chai.request(server)
                 .get(requestUrl)
-                .end((err, res) => {
+                .then((res) => {
                     res.should.have.status(200);
                     res.body.should.be.a('object');
                     const keysCount = Object.keys(res.body).length;
                     keysCount.should.be.eql(0);
                     done();
-                });
+                })
+                .catch(function (err) {
+                    done(err);
+                 });
         });
     });
 
@@ -87,12 +99,15 @@ describe('/GET/dependencies/{packageName}/{packageVersion}', () => {
 
             chai.request(server)
                 .get(requestUrl)
-                .end((err, res) => {
+                .then((res) => {
                     res.should.have.status(200);
                     res.body.should.be.a('object');
                     res.body.should.be.deep.equal(dependenciesObj);
                     done();
-                });
+                })
+                .catch(function (err) {
+                    done(err);
+                 });
         });
     });
 });

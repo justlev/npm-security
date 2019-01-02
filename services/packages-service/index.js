@@ -1,4 +1,4 @@
-const { getNpmVersionString, getNormalisedPackageName } = require('../../utilities/packageNames');
+const { getNormalisedPackageName } = require('../../utilities/packageNames');
 
 class PackagesService{
     constructor(packageInfoProvider, packageVersionProvider, cache=null){
