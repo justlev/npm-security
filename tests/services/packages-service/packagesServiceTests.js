@@ -106,7 +106,7 @@ describe('PackageInfoProvider', () => {
                     const expected = {};
                     expected[dependency1.name] = dependency1ResolvedVersion;
 
-                    const cacheKey = `pre:${rootPackage._id}`;
+                    const cacheKey = `tree:${rootPackage._id}`;
                     cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise(null));
         
                     const npmStub = sinon.stub();
@@ -137,8 +137,8 @@ describe('PackageInfoProvider', () => {
                     const expected = {};
                     expected[dependency1.name] = dependency1ResolvedVersion;
 
-                    const cacheKey = `pre:${rootPackage._id}`;
-                    cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise(rootDependenciesObject));
+                    const cacheKey = `tree:${rootPackage._id}`;
+                    cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise({...rootPackage, version: rootResolvedVersion, dependencies: [{...dependency1, version: dependency1ResolvedVersion, dependencies: []}]}));
         
                     const npmStub = sinon.stub();
                     const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
@@ -166,7 +166,7 @@ describe('PackageInfoProvider', () => {
                     const expected = {};
                     expected[dependency1.name] = dependency1ResolvedVersion;
 
-                    const cacheKey = `pre:${dependency1._id}`;
+                    const cacheKey = `tree:${dependency1._id}`;
                     cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise({}));
         
                     const npmStub = sinon.stub();
