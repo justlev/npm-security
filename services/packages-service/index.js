@@ -11,7 +11,8 @@ class PackagesService{
     }
 
     async getPackageDependenciesHash(packageName, packageVersion){
-        const result = await this._getPackageDependenciesHashRecursively(getNormalisedPackageName(packageName), getNpmVersionString(packageVersion));
+        const rootVersion = await this._packageVersionProvider(packageName, packageVersion);
+        const result = await this._getPackageDependenciesHashRecursively(getNormalisedPackageName(packageName), rootVersion);
         return result;
     }
 
@@ -50,9 +51,10 @@ class PackagesService{
     }
 
     async getNormalisedPackageTree(packageName, packageVersion){
-        const packageId = `${packageName}@${packageVersion}`;
-        const obj = {_id: packageId, name: packageName, version: packageVersion, dependencies: []};
-        await this._getPackageDetailsRecursively(getNormalisedPackageName(packageName), getNpmVersionString(packageVersion), obj);
+        const rootVersion = await this._packageVersionProvider(packageName, packageVersion);
+        const packageId = `${packageName}@${rootVersion}`;
+        const obj = {_id: packageId, name: packageName, version: rootVersion, dependencies: []};
+        await this._getPackageDetailsRecursively(getNormalisedPackageName(packageName), rootVersion, obj);
         return obj;
     }
 

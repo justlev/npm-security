@@ -10,16 +10,18 @@ describe('PackageInfoProvider', () => {
     const rootPackage = {
         _id: `lodash@1.0.0`,
         name: 'lodash',
-        version: '1.0.0',
+        version: '~1.0.0',
         dependencies: {}
     };
+    const rootResolvedVersion = "1.0.0";
 
     const dependency1 = {
         name: 'dep1',
-        version: '1.0.0',
+        version: '^1.0.0',
         dependencies: {},
         _id: 'dep1@1.0.0'
     };
+    const dependency1ResolvedVersion = "1.0.0";
 
     const dependency2 = {
         name: 'dep2',
@@ -31,7 +33,9 @@ describe('PackageInfoProvider', () => {
     const npmStub = sinon.stub();
     const npmVersionProviderStub = sinon.stub();
 
-    npmVersionProviderStub.returns("1.0.0");
+    npmVersionProviderStub.withArgs("lodash", "~1.0.0").returns(rootResolvedVersion);
+    npmVersionProviderStub.withArgs("dep1", "^1.0.0").returns(dependency1ResolvedVersion);
+    npmVersionProviderStub.withArgs("dep2", "2.0.0").returns("2.0.0");
 
     afterEach((done) => {
         npmStub.reset();
@@ -43,7 +47,7 @@ describe('PackageInfoProvider', () => {
             const subject = new PackagesService(npmStub, npmVersionProviderStub, null);
             describe('package without dependencies', () => {
                 it('should request info of packages from NPM', (done) => {
-                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackage));
+                    npmStub.withArgs(rootPackage.name, rootResolvedVersion).returns(getNpmPackageResolvedPromise(rootPackage));
                     const promise = subject.getPackageDependenciesHash(rootPackage.name, rootPackage.version);
                     promise.then((actual) => {
                         actual.should.not.be.null;
@@ -63,17 +67,20 @@ describe('PackageInfoProvider', () => {
                         _id: rootPackage._id,
                         dependencies: rootDependenciesObject
                     };
+
+                    const expected = {};
+                    expected[dependency1.name] = dependency1ResolvedVersion;
                     
                     const npmStub = sinon.stub();
-                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
-                    npmStub.withArgs(dependency1.name, dependency1.version).returns(getNpmPackageResolvedPromise(dependency1));
+                    npmStub.withArgs(rootPackage.name, rootResolvedVersion).returns(getNpmPackageResolvedPromise(rootPackageResponse));
+                    npmStub.withArgs(dependency1.name, dependency1ResolvedVersion).returns(getNpmPackageResolvedPromise(dependency1));
         
                     const subject = new PackagesService(npmStub, npmVersionProviderStub, null)
         
                     const promise = subject.getPackageDependenciesHash(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {
                         actual.should.not.be.null;
-                        actual.should.be.deep.eq(rootDependenciesObject)
+                        actual.should.be.deep.eq(expected)
                         done(); 
                     });
                 });
@@ -95,19 +102,23 @@ describe('PackageInfoProvider', () => {
                         _id: rootPackage._id,
                         dependencies: rootDependenciesObject
                     };
+
+                    const expected = {};
+                    expected[dependency1.name] = dependency1ResolvedVersion;
+
                     const cacheKey = `pre:${rootPackage._id}`;
                     cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise(null));
         
                     const npmStub = sinon.stub();
-                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
-                    npmStub.withArgs(dependency1.name, dependency1.version).returns(getNpmPackageResolvedPromise(dependency1));
+                    npmStub.withArgs(rootPackage.name, rootResolvedVersion).returns(getNpmPackageResolvedPromise(rootPackageResponse));
+                    npmStub.withArgs(dependency1.name, dependency1ResolvedVersion).returns(getNpmPackageResolvedPromise(dependency1));
                     const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
         
                     const promise = subject.getPackageDependenciesHash(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {
                         npmStub.calledTwice.should.be.true;
                         actual.should.not.be.null;
-                        actual.should.be.deep.eq(rootDependenciesObject)
+                        actual.should.be.deep.eq(expected)
                         done(); 
                     });
                 });
@@ -116,12 +127,16 @@ describe('PackageInfoProvider', () => {
             describe('package completely cached', () => {
                 it('should not request info of packages from NPM', (done) => {
                     const rootDependenciesObject = {};
-                    rootDependenciesObject[dependency1.name] = dependency1.version;
+                    rootDependenciesObject[dependency1.name] = dependency1ResolvedVersion;
 
                     const rootPackageResponse = {
                         _id: rootPackage._id,
                         dependencies: rootDependenciesObject
                     };
+
+                    const expected = {};
+                    expected[dependency1.name] = dependency1ResolvedVersion;
+
                     const cacheKey = `pre:${rootPackage._id}`;
                     cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise(rootDependenciesObject));
         
@@ -132,7 +147,7 @@ describe('PackageInfoProvider', () => {
                     promise.then((actual)=> {
                         npmStub.called.should.be.false;
                         actual.should.not.be.null;
-                        actual.should.be.deep.eq(rootDependenciesObject)
+                        actual.should.be.deep.eq(expected)
                         done(); 
                     });
                 });
@@ -147,19 +162,24 @@ describe('PackageInfoProvider', () => {
                         _id: rootPackage._id,
                         dependencies: rootDependenciesObject
                     };
+
+                    const expected = {};
+                    expected[dependency1.name] = dependency1ResolvedVersion;
+
                     const cacheKey = `pre:${dependency1._id}`;
                     cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise({}));
         
                     const npmStub = sinon.stub();
-                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
+                    npmStub.withArgs(rootPackage.name, rootResolvedVersion).returns(getNpmPackageResolvedPromise(rootPackageResponse));
                     const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
         
                     const promise = subject.getPackageDependenciesHash(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {
-                        npmStub.calledOnceWith(rootPackage.name, rootPackage.version).should.be.true;
+                        npmStub.calledOnceWith(rootPackage.name, rootResolvedVersion).should.be.true;
                         npmStub.calledWith(dependency1.name, dependency1.version).should.be.false;
+                        npmStub.calledWith(dependency1.name, dependency1ResolvedVersion).should.be.false;
                         actual.should.not.be.null;
-                        actual.should.be.deep.eq(rootDependenciesObject)
+                        actual.should.be.deep.eq(expected)
                         done(); 
                     });
                 });
@@ -172,12 +192,12 @@ describe('PackageInfoProvider', () => {
             const subject = new PackagesService(npmStub, npmVersionProviderStub, null);
             describe("no dependencies", () => {
                 it("should empty object", (done) => {
-                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackage));
+                    npmStub.withArgs(rootPackage.name, rootResolvedVersion).returns(getNpmPackageResolvedPromise(rootPackage));
                     const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
                     promise.then((actual) => {
                         actual.should.not.be.null;
                         actual.name.should.be.eq(rootPackage.name);
-                        actual.version.should.be.eq(rootPackage.version);
+                        actual.version.should.be.eq(rootResolvedVersion);
                         actual.dependencies.should.not.be.null;
                         actual.dependencies.length.should.be.eq(0);
                         done(); 
@@ -197,14 +217,16 @@ describe('PackageInfoProvider', () => {
                         ...rootPackage,
                         dependencies: rootDependenciesObject
                     };
-                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
-                    npmStub.withArgs(dependency1.name, dependency1.version).returns(getNpmPackageResolvedPromise(dependency1));
+                    npmStub.withArgs(rootPackage.name, rootResolvedVersion).returns(getNpmPackageResolvedPromise(rootPackageResponse));
+                    npmStub.withArgs(dependency1.name, dependency1ResolvedVersion).returns(getNpmPackageResolvedPromise(dependency1));
                     const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
 
                     const expected = {
                         ...rootPackage,
+                        version: rootResolvedVersion,
                         dependencies: [{
                             ...dependency1,
+                            version: dependency1ResolvedVersion,
                             dependencies: []
                         }]
                     };
@@ -236,15 +258,17 @@ describe('PackageInfoProvider', () => {
                         ...dependency1,
                         dependencies: dependency1DepsObj
                     };
-                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
-                    npmStub.withArgs(dependency1.name, dependency1.version).returns(getNpmPackageResolvedPromise(dependency1ResponseObj));
+                    npmStub.withArgs(rootPackage.name, rootResolvedVersion).returns(getNpmPackageResolvedPromise(rootPackageResponse));
+                    npmStub.withArgs(dependency1.name, dependency1ResolvedVersion).returns(getNpmPackageResolvedPromise(dependency1ResponseObj));
                     npmStub.withArgs(dependency2.name, dependency2.version).returns(getNpmPackageResolvedPromise(dependency2));
                     const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
 
                     const expected = {
                         ...rootPackage,
+                        version: rootResolvedVersion,
                         dependencies: [{
                             ...dependency1,
+                            version: dependency1ResolvedVersion,
                             dependencies: [{
                                 ...dependency2,
                                 dependencies: []
@@ -282,11 +306,11 @@ describe('PackageInfoProvider', () => {
                     cache.get.returns(getNpmPackageResolvedPromise(null));
         
                     const npmStub = sinon.stub();
-                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
-                    npmStub.withArgs(dependency1.name, dependency1.version).returns(getNpmPackageResolvedPromise(dependency1));
+                    npmStub.withArgs(rootPackage.name, rootResolvedVersion).returns(getNpmPackageResolvedPromise(rootPackageResponse));
+                    npmStub.withArgs(dependency1.name, dependency1ResolvedVersion).returns(getNpmPackageResolvedPromise(dependency1));
                     const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
                     
-                    const expected = {...rootPackage, dependencies: [{...dependency1, dependencies: []}]};
+                    const expected = {...rootPackage, version: rootResolvedVersion, dependencies: [{...dependency1, version: dependency1ResolvedVersion, dependencies: []}]};
                     const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {
                         npmStub.calledTwice.should.be.true;
@@ -299,7 +323,7 @@ describe('PackageInfoProvider', () => {
             describe('package completely cached', () => {
                 it('should not request info of packages from NPM', (done) => {
                     const rootItemKey = `tree:${rootPackage._id}`;
-                    const expected = {...rootPackage, dependencies: [{...dependency1, dependencies: []}]};
+                    const expected = {...rootPackage, version: rootResolvedVersion, dependencies: [{...dependency1, version: dependency1ResolvedVersion, dependencies: []}]};
                     cache.get.withArgs(rootItemKey).returns(getNpmPackageResolvedPromise(expected));
         
                     const npmStub = sinon.stub();
@@ -325,18 +349,18 @@ describe('PackageInfoProvider', () => {
                         dependencies: rootDependenciesObject
                     };
                     const cacheKey = `tree:${dependency1._id}`;
-                    const dependency1Object = {...dependency1, dependencies: []};
-                    const expected = {...rootPackage, dependencies: [dependency1Object]};
+                    const dependency1Object = {...dependency1, version: dependency1ResolvedVersion, dependencies: []};
+                    const expected = {...rootPackage, version: rootResolvedVersion, dependencies: [dependency1Object]};
                     cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise(dependency1Object));
         
                     const npmStub = sinon.stub();
-                    npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
+                    npmStub.withArgs(rootPackage.name, rootResolvedVersion).returns(getNpmPackageResolvedPromise(rootPackageResponse));
                     const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
         
                     const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {
-                        npmStub.calledOnceWith(rootPackage.name, rootPackage.version).should.be.true;
-                        npmStub.calledWith(dependency1.name, dependency1.version).should.be.false;
+                        npmStub.calledOnceWith(rootPackage.name, rootResolvedVersion).should.be.true;
+                        npmStub.calledWith(dependency1.name, dependency1ResolvedVersion).should.be.false;
                         actual.should.not.be.null;
                         actual.should.be.deep.eq(expected)
                         done(); 
