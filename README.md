@@ -13,6 +13,7 @@ npm start
 
 # Testing:
 The project runs tests via Mocha and displays code-coverage using Istanbul NYC.
+Current test coverage is ~95% of lines and ~90% of functions. I am fully aware that counting solely on these statistics is not the right thing to do, though it is a good ambition to have a high code coverage. The quality of tests is a whole other matter.
 
 # Next steps:
 We will need to compare the result of the API in order to find which packages and dependencies are vulnerable.
