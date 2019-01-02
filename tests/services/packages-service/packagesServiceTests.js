@@ -29,6 +29,9 @@ describe('PackageInfoProvider', () => {
     };
 
     const npmStub = sinon.stub();
+    const npmVersionProviderStub = sinon.stub();
+
+    npmVersionProviderStub.returns("1.0.0");
 
     afterEach((done) => {
         npmStub.reset();
@@ -37,7 +40,7 @@ describe('PackageInfoProvider', () => {
 
     describe('#getPackageDependenciesHash', () => {
         describe('no cache', () => {
-            const subject = new PackagesService(npmStub, null);
+            const subject = new PackagesService(npmStub, npmVersionProviderStub, null);
             describe('package without dependencies', () => {
                 it('should request info of packages from NPM', (done) => {
                     npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackage));
@@ -65,7 +68,7 @@ describe('PackageInfoProvider', () => {
                     npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
                     npmStub.withArgs(dependency1.name, dependency1.version).returns(getNpmPackageResolvedPromise(dependency1));
         
-                    const subject = new PackagesService(npmStub, null)
+                    const subject = new PackagesService(npmStub, npmVersionProviderStub, null)
         
                     const promise = subject.getPackageDependenciesHash(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {
@@ -98,7 +101,7 @@ describe('PackageInfoProvider', () => {
                     const npmStub = sinon.stub();
                     npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
                     npmStub.withArgs(dependency1.name, dependency1.version).returns(getNpmPackageResolvedPromise(dependency1));
-                    const subject = new PackagesService(npmStub, cache);
+                    const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
         
                     const promise = subject.getPackageDependenciesHash(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {
@@ -123,7 +126,7 @@ describe('PackageInfoProvider', () => {
                     cache.get.withArgs(cacheKey).returns(getNpmPackageResolvedPromise(rootDependenciesObject));
         
                     const npmStub = sinon.stub();
-                    const subject = new PackagesService(npmStub, cache);
+                    const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
         
                     const promise = subject.getPackageDependenciesHash(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {
@@ -149,7 +152,7 @@ describe('PackageInfoProvider', () => {
         
                     const npmStub = sinon.stub();
                     npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
-                    const subject = new PackagesService(npmStub, cache);
+                    const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
         
                     const promise = subject.getPackageDependenciesHash(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {
@@ -166,7 +169,7 @@ describe('PackageInfoProvider', () => {
 
     describe("getNormalisedPackageTree", () => {
         describe("no cache", () => {
-            const subject = new PackagesService(npmStub, null);
+            const subject = new PackagesService(npmStub, npmVersionProviderStub, null);
             describe("no dependencies", () => {
                 it("should empty object", (done) => {
                     npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackage));
@@ -281,7 +284,7 @@ describe('PackageInfoProvider', () => {
                     const npmStub = sinon.stub();
                     npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
                     npmStub.withArgs(dependency1.name, dependency1.version).returns(getNpmPackageResolvedPromise(dependency1));
-                    const subject = new PackagesService(npmStub, cache);
+                    const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
                     
                     const expected = {...rootPackage, dependencies: [{...dependency1, dependencies: []}]};
                     const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
@@ -300,7 +303,7 @@ describe('PackageInfoProvider', () => {
                     cache.get.withArgs(rootItemKey).returns(getNpmPackageResolvedPromise(expected));
         
                     const npmStub = sinon.stub();
-                    const subject = new PackagesService(npmStub, cache);
+                    const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
                     
                     
                     const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
@@ -328,7 +331,7 @@ describe('PackageInfoProvider', () => {
         
                     const npmStub = sinon.stub();
                     npmStub.withArgs(rootPackage.name, rootPackage.version).returns(getNpmPackageResolvedPromise(rootPackageResponse));
-                    const subject = new PackagesService(npmStub, cache);
+                    const subject = new PackagesService(npmStub, npmVersionProviderStub, cache);
         
                     const promise = subject.getNormalisedPackageTree(rootPackage.name, rootPackage.version);
                     promise.then((actual)=> {

@@ -1,12 +1,12 @@
 const RedisCache = require('../caches/redis-cache');
 const conditionsHandlerFunction = require('../conditions-handler');
 const PackagesService = require('../packages-service');
-const npmInfoProvider = require('../packages-service/npm');
+const npmProvider = require('../packages-service/npm');
 
 //By using Redis - we are offloading the cache-eviction logic to Redis itself which implements it quite well
 //We can change the eviction policies in Redis config.
 const cache = new RedisCache();
-const packagesService = new PackagesService(npmInfoProvider, cache);
+const packagesService = new PackagesService(npmProvider.getPackageInfo, npmProvider.getExactMatchingVersion, cache);
 
 const instances = {
     RedisCache: cache,

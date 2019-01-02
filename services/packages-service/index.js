@@ -1,9 +1,10 @@
 const { getNpmVersionString, getNormalisedPackageName } = require('../../utilities/packageNames');
 
 class PackagesService{
-    constructor(packageInfoProvider, cache=null){
+    constructor(packageInfoProvider, packageVersionProvider, cache=null){
         this._cache = cache;
         this._packageInfoProvider = packageInfoProvider;
+        this._packageVersionProvider = packageVersionProvider;
 
         this._flatCachePrefix="pre:";
         this._treeCachePrefix="tree:";
@@ -35,8 +36,8 @@ class PackagesService{
                 const key = dependenciesKeys[i];
                 const normalisedKey = getNormalisedPackageName(key);
                 const version = info.dependencies[key];
-                const normalisedVersion = getNpmVersionString(version);
-                dependenciesObjects[normalisedKey] = version;
+                const normalisedVersion = await this._packageVersionProvider(normalisedKey, version);
+                dependenciesObjects[normalisedKey] = normalisedVersion;
                 const childDependencies = await this._getPackageDependenciesHashRecursively(normalisedKey, normalisedVersion);
                 Object.assign(dependenciesObjects, childDependencies)
             }
@@ -77,9 +78,9 @@ class PackagesService{
                 const key = dependenciesKeys[i];
                 const normalisedKey = getNormalisedPackageName(key);
                 const version = info.dependencies[key];
-                const normalisedVersion = getNpmVersionString(version);
+                const normalisedVersion = await this._packageVersionProvider(normalisedKey, version);
                 const dependencyId = `${normalisedKey}@${normalisedVersion}`;
-                const depObj = {_id: dependencyId, name: normalisedKey, version: version, dependencies: []};
+                const depObj = {_id: dependencyId, name: normalisedKey, version: normalisedVersion, dependencies: []};
                 obj.dependencies.push(depObj);
                 await this._getPackageDetailsRecursively(key, normalisedVersion, depObj);
             }
