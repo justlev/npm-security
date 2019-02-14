@@ -5,6 +5,9 @@ function findMatchingVersion(allVersions, matchingPattern){
 
     // The following versions lookup can be optimised:
     const sortedVersions = allVersions.sort();
+    if (matchingPattern == 'latest'){
+        return sortedVersions[sortedVersions.length-1];
+    }
     const matchingVersions = sortedVersions.filter(item => semver.satisfies(item, matchingPattern));
     if (matchingVersions.length == 0 ){
         return null;
